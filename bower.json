@@ -1,0 +1,19 @@
+{
+  "name": "api-js",
+  "description": "A standardized API-communication module for JS.",
+  "main": "api_js.es6",
+  "authors": [
+    "Daniel Staudigel <dstaudigel@gmail.com>"
+  ],
+  "license": "GPL-3.0",
+  "homepage": "https://github.com/thehumaneffort/api-js",
+  "moduleType": [],
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
