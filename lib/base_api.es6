@@ -17,6 +17,8 @@ let defaultHandlers = {
 
   login: function() { return err(`Cannot log in while ${this.state}`); },
 
+  signup: function() { return err(`Cannot sign up while ${this.state}`); },
+
   logout: function() { return err(`Cannot log out while ${this.state}`); },
 
   recover_password: function() { return err(`Cannot recover password while ${this.state}`); },
@@ -56,16 +58,24 @@ module.exports = machina.Fsm.extend(
           });
         },
 
+        signup: function(...args) {
+          this.transition('authenticating');
+          return this._signup(...args).then((res) => {
+            this.data = res;
+            this.transition('signing_up');
+            return res;
+          }).catch((x) => {
+            this.transition('logged_out');
+            return Promise.reject(x);
+          });
+        },
+
         recover_password: function(...args) {
           return this._recoverPassword(...args);
         },
 
         reset_password: function(...args) {
           return this._resetPassword(...args);
-        },
-
-        signup: function(...args) {
-          return this._signup(...args);
         },
       }),
 
@@ -114,7 +124,7 @@ module.exports = machina.Fsm.extend(
       signing_up: _.extend({}, defaultHandlers, {
         _onEnter: function() {
           console.log('Sending logging in signal');
-          this.emit('logging_in');
+          this.emit('signing_up');
           console.log('Done sending logging in signal');
         },
 
@@ -143,6 +153,8 @@ module.exports = machina.Fsm.extend(
     },
 
     login: function(...args) { return this.handle('login', ...args); },
+
+    signup: function(...args) { return this.handle('signup', ...args); },
 
     waitFor: function(promise) { return this.handle('wait_for', promise); },
 

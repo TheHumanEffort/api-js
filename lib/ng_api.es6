@@ -5,6 +5,7 @@ let NgHttpApi = Base.extend({
     Base.prototype.initialize.call(this, options, ...args);
 
     this._baseUrl = options.baseUrl;
+    this._$q = options.$q;
     this._$http = options.$http;
   },
 
@@ -13,8 +14,12 @@ let NgHttpApi = Base.extend({
   },
 
   _procHttpResponse: function(promise) {
-    return promise.then(function(res) {
-      return res.data;
+    return promise.then((res) => {
+      if (res.data.errors) {
+        return this._$q.reject({ type: this.ERROR_VALIDATION_FAILED, data: res.data.errors });
+      } else {
+        return res.data;
+      }
     }).catch((x) => {
       let res = x;
       if (x.status == 0) {
@@ -37,6 +42,10 @@ let NgHttpApi = Base.extend({
         data: postData, });
   },
 
+  _signup: function(hash) {
+    return this._procHttpResponse(this.post('authentication/signup', hash));
+  },
+
   _login: function(hash) {
     return this._procHttpResponse(this.post('authentication/login', hash));
   },
@@ -49,8 +58,8 @@ angular.module('ngApi', []).provider('Api', function() {
     apiBaseURL = baseURL;
   };
 
-  this.$get = ['$http', function($http) {
-    return window.Api = new NgHttpApi({ baseUrl: apiBaseURL, $http: $http });
+  this.$get = ['$http', '$q', function($http, $q) {
+    return window.Api = new NgHttpApi({ baseUrl: apiBaseURL, $http: $http, $q: $q });
   },];
 });
 

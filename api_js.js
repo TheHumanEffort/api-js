@@ -99,6 +99,10 @@ module.exports =
 	    return err('Cannot log in while ' + this.state);
 	  },
 
+	  signup: function signup() {
+	    return err('Cannot sign up while ' + this.state);
+	  },
+
 	  logout: function logout() {
 	    return err('Cannot log out while ' + this.state);
 	  },
@@ -145,16 +149,26 @@ module.exports =
 	        });
 	      },
 
+	      signup: function signup() {
+	        var _this2 = this;
+
+	        this.transition('authenticating');
+	        return this._signup.apply(this, arguments).then(function (res) {
+	          _this2.data = res;
+	          _this2.transition('signing_up');
+	          return res;
+	        }).catch(function (x) {
+	          _this2.transition('logged_out');
+	          return Promise.reject(x);
+	        });
+	      },
+
 	      recover_password: function recover_password() {
 	        return this._recoverPassword.apply(this, arguments);
 	      },
 
 	      reset_password: function reset_password() {
 	        return this._resetPassword.apply(this, arguments);
-	      },
-
-	      signup: function signup() {
-	        return this._signup.apply(this, arguments);
 	      }
 	    }),
 
@@ -181,33 +195,6 @@ module.exports =
 	      },
 
 	      wait_for: function wait_for(promise) {
-	        var _this2 = this;
-
-	        this._waiting_for = this._waiting_for || [];
-	        this._waiting_for.push(promise);
-
-	        promise.then(function () {
-	          var index = _this2._waiting_for.indexOf(promise);
-	          _this2._waiting_for.splice(index, 1);
-
-	          if (_this2._waiting_for.length == 0) {
-	            _this2._waiting_for = null;
-	            _this2.transition('logged_in');
-	          }
-	        }).catch(function (x) {
-	          _this2.reportError(x);
-	          _this2.transition('logged_out');
-	        });
-	      }
-	    }),
-	    signing_up: _lodash2.default.extend({}, defaultHandlers, {
-	      _onEnter: function _onEnter() {
-	        console.log('Sending logging in signal');
-	        this.emit('logging_in');
-	        console.log('Done sending logging in signal');
-	      },
-
-	      wait_for: function wait_for(promise) {
 	        var _this3 = this;
 
 	        this._waiting_for = this._waiting_for || [];
@@ -216,6 +203,7 @@ module.exports =
 	        promise.then(function () {
 	          var index = _this3._waiting_for.indexOf(promise);
 	          _this3._waiting_for.splice(index, 1);
+
 	          if (_this3._waiting_for.length == 0) {
 	            _this3._waiting_for = null;
 	            _this3.transition('logged_in');
@@ -223,6 +211,32 @@ module.exports =
 	        }).catch(function (x) {
 	          _this3.reportError(x);
 	          _this3.transition('logged_out');
+	        });
+	      }
+	    }),
+	    signing_up: _lodash2.default.extend({}, defaultHandlers, {
+	      _onEnter: function _onEnter() {
+	        console.log('Sending logging in signal');
+	        this.emit('signing_up');
+	        console.log('Done sending logging in signal');
+	      },
+
+	      wait_for: function wait_for(promise) {
+	        var _this4 = this;
+
+	        this._waiting_for = this._waiting_for || [];
+	        this._waiting_for.push(promise);
+
+	        promise.then(function () {
+	          var index = _this4._waiting_for.indexOf(promise);
+	          _this4._waiting_for.splice(index, 1);
+	          if (_this4._waiting_for.length == 0) {
+	            _this4._waiting_for = null;
+	            _this4.transition('logged_in');
+	          }
+	        }).catch(function (x) {
+	          _this4.reportError(x);
+	          _this4.transition('logged_out');
 	        });
 	      }
 	    }),
@@ -243,21 +257,29 @@ module.exports =
 	    return this.handle.apply(this, ['login'].concat(args));
 	  },
 
+	  signup: function signup() {
+	    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+	      args[_key2] = arguments[_key2];
+	    }
+
+	    return this.handle.apply(this, ['signup'].concat(args));
+	  },
+
 	  waitFor: function waitFor(promise) {
 	    return this.handle('wait_for', promise);
 	  },
 
 	  recoverPassword: function recoverPassword() {
-	    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-	      args[_key2] = arguments[_key2];
+	    for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+	      args[_key3] = arguments[_key3];
 	    }
 
 	    return this.handle.apply(this, ['recover_password'].concat(args));
 	  },
 
 	  resetPassword: function resetPassword() {
-	    for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-	      args[_key3] = arguments[_key3];
+	    for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+	      args[_key4] = arguments[_key4];
 	    }
 
 	    return this.handle.apply(this, ['reset_password'].concat(args));
@@ -347,6 +369,7 @@ module.exports =
 	    (_Base$prototype$initi = _base_api2.default.prototype.initialize).call.apply(_Base$prototype$initi, [this, options].concat(args));
 
 	    this._baseUrl = options.baseUrl;
+	    this._$q = options.$q;
 	    this._$http = options.$http;
 	  },
 
@@ -358,7 +381,11 @@ module.exports =
 	    var _this = this;
 
 	    return promise.then(function (res) {
-	      return res.data;
+	      if (res.data.errors) {
+	        return _this._$q.reject({ type: _this.ERROR_VALIDATION_FAILED, data: res.data.errors });
+	      } else {
+	        return res.data;
+	      }
 	    }).catch(function (x) {
 	      var res = x;
 	      if (x.status == 0) {
@@ -380,6 +407,10 @@ module.exports =
 	      data: postData });
 	  },
 
+	  _signup: function _signup(hash) {
+	    return this._procHttpResponse(this.post('authentication/signup', hash));
+	  },
+
 	  _login: function _login(hash) {
 	    return this._procHttpResponse(this.post('authentication/login', hash));
 	  }
@@ -392,8 +423,8 @@ module.exports =
 	    apiBaseURL = baseURL;
 	  };
 
-	  this.$get = ['$http', function ($http) {
-	    return window.Api = new NgHttpApi({ baseUrl: apiBaseURL, $http: $http });
+	  this.$get = ['$http', '$q', function ($http, $q) {
+	    return window.Api = new NgHttpApi({ baseUrl: apiBaseURL, $http: $http, $q: $q });
 	  }];
 	});
 
