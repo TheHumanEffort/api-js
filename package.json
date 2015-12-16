@@ -16,11 +16,14 @@
     "url": "https://github.com/thehumaneffort/api-js/issues"
   },
   "homepage": "https://github.com/thehumaneffort/api-js#readme",
-  "dependencies": {
+  "devDependencies": {
     "babel-loader": "^6.2.0",
     "babel-preset-es2015": "^6.3.13",
-    "lodash": "^3.10.1",
-    "machina": "^1.1.2",
+    "json": "^9.0.3",
     "webpack": "^1.12.9"
+  },
+  "peerDependencies": {
+    "lodash": "^3.10.1",
+    "machina": "^1.1.2"
   }
 }
