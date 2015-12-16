@@ -1,6 +1,6 @@
 {
   "name": "api-js",
-  "version": "0.1.0",
+  "version": "v0.0.1b2",
   "description": "A standardized API-communication module for JS.",
   "main": "api_js.js",
   "scripts": {
