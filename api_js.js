@@ -145,7 +145,7 @@ module.exports =
 	          return res;
 	        }).catch(function (x) {
 	          _this.transition('logged_out');
-	          return Promise.reject(x);
+	          return _this._reject(x);
 	        });
 	      },
 
@@ -159,7 +159,7 @@ module.exports =
 	          return res;
 	        }).catch(function (x) {
 	          _this2.transition('logged_out');
-	          return Promise.reject(x);
+	          return _this2._reject(x);
 	        });
 	      },
 
@@ -323,6 +323,9 @@ module.exports =
 
 	  // recover password should send an email/SMS with a token, or whatever
 	  _recoverPassword: function _recoverPassword() {},
+	  _reject: function _reject(message) {
+	    return Promise.reject(message);
+	  },
 
 	  // reset password should take a token and a password, and return a promise
 	  _resetPassword: function _resetPassword() {
@@ -413,6 +416,10 @@ module.exports =
 
 	  _login: function _login(hash) {
 	    return this._procHttpResponse(this.post('authentication/login', hash));
+	  },
+
+	  _reject: function _reject(message) {
+	    this._$q.reject(message);
 	  }
 	});
 

@@ -49,6 +49,10 @@ let NgHttpApi = Base.extend({
   _login: function(hash) {
     return this._procHttpResponse(this.post('authentication/login', hash));
   },
+
+  _reject: function(message){
+    this._$q.reject(message);
+  },
 });
 
 angular.module('ngApi', []).provider('Api', function() {
