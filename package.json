@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/thehumaneffort/api-js#readme",
   "devDependencies": {
+    "babel-core": "^6.3.17",
     "babel-loader": "^6.2.0",
     "babel-preset-es2015": "^6.3.13",
     "json": "^9.0.3",
