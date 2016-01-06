@@ -19,7 +19,11 @@ let defaultHandlers = {
 
   signup: function() { return err(`Cannot sign up while ${this.state}`); },
 
-  logout: function() { return err(`Cannot log out while ${this.state}`); },
+  logout: function() {
+    this.emit('api_data_changed',undefined);
+    return this._logout().catch((x) => { console.error('Error logging out: ', x); })
+      .then(() => this.transition('logged_out'));
+  },
 
   recover_password: function() { return err(`Cannot recover password while ${this.state}`); },
 
@@ -39,17 +43,26 @@ module.exports = machina.Fsm.extend(
     states: {
       uninitialized: _.extend({}, defaultHandlers, {
         load_state: function(options) {
-          this.transition('logged_out');
+          if(options && options.token && options.member_id && options.email) {
+            this.data = options;
+            this.transition('logged_in');
+          } else {
+            this.transition('logged_out');
+          }
         },
       }),
 
       // Nobody is logged in, we can log in, reset a password, or recover a
       // password
       logged_out: _.extend({}, defaultHandlers, {
+        logout: function() { return err(`Cannot log out while ${this.state}`); },
+      
         login: function(...args) {
           this.transition('authenticating');
           return this._login(...args).then((res) => {
             this.data = res;
+            
+            this.emit('api_data_changed',res);
             this.transition('logging_in');
             return res;
           }).catch((x) => {
@@ -62,6 +75,7 @@ module.exports = machina.Fsm.extend(
           this.transition('authenticating');
           return this._signup(...args).then((res) => {
             this.data = res;
+            this.emit('api_data_changed',res);
             this.transition('signing_up');
             return res;
           }).catch((x) => {
@@ -137,6 +151,7 @@ module.exports = machina.Fsm.extend(
             this._waiting_for.splice(index, 1);
             if (this._waiting_for.length == 0) {
               this._waiting_for = null;
+
               this.transition('logged_in');
             }
           }).catch((x) => {
@@ -149,11 +164,6 @@ module.exports = machina.Fsm.extend(
       // We are logged in!  We can now go about our business.
       logged_in: _.extend({}, defaultHandlers, {
         wait_for: function() { this.reportError('Cannot wait for login results while logged in'); },
-
-        logout: function() {
-          return this._logout().catch((x) => { console.error('Error logging out: ', x); })
-            .then(() => this.transition('logged_out'));
-        },
       }),
     },
 
