@@ -51,7 +51,7 @@ module.exports =
 
 	var _base_api2 = _interopRequireDefault(_base_api);
 
-	var _ng_api = __webpack_require__(2);
+	var _ng_api = __webpack_require__(4);
 
 	var _ng_api2 = _interopRequireDefault(_ng_api);
 
@@ -68,11 +68,11 @@ module.exports =
 
 	'use strict';
 
-	var _machina = __webpack_require__(3);
+	var _machina = __webpack_require__(2);
 
 	var _machina2 = _interopRequireDefault(_machina);
 
-	var _lodash = __webpack_require__(4);
+	var _lodash = __webpack_require__(3);
 
 	var _lodash2 = _interopRequireDefault(_lodash);
 
@@ -145,7 +145,7 @@ module.exports =
 	          return res;
 	        }).catch(function (x) {
 	          _this.transition('logged_out');
-	          return Promise.reject(x);
+	          return _this._reject(x);
 	        });
 	      },
 
@@ -159,7 +159,7 @@ module.exports =
 	          return res;
 	        }).catch(function (x) {
 	          _this2.transition('logged_out');
-	          return Promise.reject(x);
+	          return _this2._reject(x);
 	        });
 	      },
 
@@ -341,6 +341,9 @@ module.exports =
 
 	  // recover password should send an email/SMS with a token, or whatever
 	  _recoverPassword: function _recoverPassword() {},
+	  _reject: function _reject(message) {
+	    return Promise.reject(message);
+	  },
 
 	  // reset password should take a token and a password, and return a promise
 	  _resetPassword: function _resetPassword() {
@@ -354,6 +357,18 @@ module.exports =
 
 /***/ },
 /* 2 */
+/***/ function(module, exports) {
+
+	module.exports = require("machina");
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	module.exports = require("lodash");
+
+/***/ },
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -423,6 +438,10 @@ module.exports =
 
 	  _logout: function _logout() {
 	    return this.post('authentication/logout');
+	  },
+
+	  _reject: function _reject(message) {
+	    this._$q.reject(message);
 	  }
 	});
 
@@ -439,18 +458,6 @@ module.exports =
 	});
 
 	module.exports = NgHttpApi;
-
-/***/ },
-/* 3 */
-/***/ function(module, exports) {
-
-	module.exports = require("machina");
-
-/***/ },
-/* 4 */
-/***/ function(module, exports) {
-
-	module.exports = require("lodash");
 
 /***/ }
 /******/ ]);

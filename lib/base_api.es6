@@ -54,7 +54,7 @@ module.exports = machina.Fsm.extend(
             return res;
           }).catch((x) => {
             this.transition('logged_out');
-            return Promise.reject(x);
+            return this._reject(x);
           });
         },
 
@@ -66,7 +66,7 @@ module.exports = machina.Fsm.extend(
             return res;
           }).catch((x) => {
             this.transition('logged_out');
-            return Promise.reject(x);
+            return this._reject(x);
           });
         },
 
@@ -208,6 +208,9 @@ module.exports = machina.Fsm.extend(
     // recover password should send an email/SMS with a token, or whatever
     _recoverPassword: function(...args) {
 
+    },
+    _reject: function(message){
+      return Promise.reject(message);
     },
 
     // reset password should take a token and a password, and return a promise

@@ -54,6 +54,10 @@ let NgHttpApi = Base.extend({
   _logout: function() {
     return this.post('authentication/logout');
   },
+
+  _reject: function(message) {
+    this._$q.reject(message);
+  },
 });
 
 angular.module('ngApi', []).provider('Api', function() {
