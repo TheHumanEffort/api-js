@@ -1,3 +1,4 @@
+
 import Base from './base_api.es6';
 
 let NgHttpApi = Base.extend({
@@ -49,6 +50,10 @@ let NgHttpApi = Base.extend({
   _login: function(hash) {
     return this._procHttpResponse(this.post('authentication/login', hash));
   },
+
+  _logout: function() {
+    return this.post('authentication/logout');
+  },
 });
 
 angular.module('ngApi', []).provider('Api', function() {
@@ -60,7 +65,8 @@ angular.module('ngApi', []).provider('Api', function() {
 
   this.$get = ['$http', '$q', function($http, $q) {
     return window.Api = new NgHttpApi({ baseUrl: apiBaseURL, $http: $http, $q: $q });
-  },];
+  },
+];
 });
 
 module.exports = NgHttpApi;

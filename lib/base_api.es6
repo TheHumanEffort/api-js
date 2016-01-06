@@ -149,12 +149,19 @@ module.exports = machina.Fsm.extend(
       // We are logged in!  We can now go about our business.
       logged_in: _.extend({}, defaultHandlers, {
         wait_for: function() { this.reportError('Cannot wait for login results while logged in'); },
+
+        logout: function() {
+          return this._logout().catch((x) => { console.error('Error logging out: ', x); })
+            .then(() => this.transition('logged_out'));
+        },
       }),
     },
 
     login: function(...args) { return this.handle('login', ...args); },
 
     signup: function(...args) { return this.handle('signup', ...args); },
+
+    logout: function(...args) { return this.handle('logout', ...args ); },
 
     waitFor: function(promise) { return this.handle('wait_for', promise); },
 

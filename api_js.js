@@ -51,7 +51,7 @@ module.exports =
 
 	var _base_api2 = _interopRequireDefault(_base_api);
 
-	var _ng_api = __webpack_require__(4);
+	var _ng_api = __webpack_require__(2);
 
 	var _ng_api2 = _interopRequireDefault(_ng_api);
 
@@ -68,11 +68,11 @@ module.exports =
 
 	'use strict';
 
-	var _machina = __webpack_require__(2);
+	var _machina = __webpack_require__(3);
 
 	var _machina2 = _interopRequireDefault(_machina);
 
-	var _lodash = __webpack_require__(3);
+	var _lodash = __webpack_require__(4);
 
 	var _lodash2 = _interopRequireDefault(_lodash);
 
@@ -245,6 +245,16 @@ module.exports =
 	    logged_in: _lodash2.default.extend({}, defaultHandlers, {
 	      wait_for: function wait_for() {
 	        this.reportError('Cannot wait for login results while logged in');
+	      },
+
+	      logout: function logout() {
+	        var _this5 = this;
+
+	        return this._logout().catch(function (x) {
+	          console.error('Error logging out: ', x);
+	        }).then(function () {
+	          return _this5.transition('logged_out');
+	        });
 	      }
 	    })
 	  },
@@ -265,21 +275,29 @@ module.exports =
 	    return this.handle.apply(this, ['signup'].concat(args));
 	  },
 
+	  logout: function logout() {
+	    for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+	      args[_key3] = arguments[_key3];
+	    }
+
+	    return this.handle.apply(this, ['logout'].concat(args));
+	  },
+
 	  waitFor: function waitFor(promise) {
 	    return this.handle('wait_for', promise);
 	  },
 
 	  recoverPassword: function recoverPassword() {
-	    for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-	      args[_key3] = arguments[_key3];
+	    for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+	      args[_key4] = arguments[_key4];
 	    }
 
 	    return this.handle.apply(this, ['recover_password'].concat(args));
 	  },
 
 	  resetPassword: function resetPassword() {
-	    for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-	      args[_key4] = arguments[_key4];
+	    for (var _len5 = arguments.length, args = Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+	      args[_key5] = arguments[_key5];
 	    }
 
 	    return this.handle.apply(this, ['reset_password'].concat(args));
@@ -336,18 +354,6 @@ module.exports =
 
 /***/ },
 /* 2 */
-/***/ function(module, exports) {
-
-	module.exports = require("machina");
-
-/***/ },
-/* 3 */
-/***/ function(module, exports) {
-
-	module.exports = require("lodash");
-
-/***/ },
-/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -413,6 +419,10 @@ module.exports =
 
 	  _login: function _login(hash) {
 	    return this._procHttpResponse(this.post('authentication/login', hash));
+	  },
+
+	  _logout: function _logout() {
+	    return this.post('authentication/logout');
 	  }
 	});
 
@@ -429,6 +439,18 @@ module.exports =
 	});
 
 	module.exports = NgHttpApi;
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	module.exports = require("machina");
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	module.exports = require("lodash");
 
 /***/ }
 /******/ ]);
