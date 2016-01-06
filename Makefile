@@ -1,10 +1,4 @@
-WEBPACK=node_modules/.bin/webpack --config webpack.config.js
-TARGET=api_js.js
-SRC=lib/
-
-build: $(TARGET)
-
-release: build
+release:
 	@echo Latest version: $(shell git tag | tail -n 1)
 	@while [ -z "$$VERSION" ]; do \
     read -r -p "Version: " VERSION;\
@@ -18,9 +12,3 @@ release: build
 		git tag -a $$VERSION -m "Release $$VERSION"; \
 	)
 	git push origin master --follow-tags
-
-$(TARGET): $(SRC)/index.es6 $(shell find lib -name '*.es6' -or -name '*.js')
-	$(WEBPACK) $< $@
-
-watch:
-	$(WEBPACK) --watch $(SRC)/index.es6 $(TARGET)
