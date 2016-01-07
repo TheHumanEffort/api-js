@@ -30,6 +30,30 @@ let defaultHandlers = {
   reset_password: function() { return err(`Cannot reset password while ${this.state}`); },
 };
 
+function waitingState(name) {
+  return _.extend({}, defaultHandlers, {
+    _onEnter: function() {
+      console.log(`Sending ${name} signal`);
+      this._waiting_for = [];
+      this.emit(name);
+      console.log(`Done sending ${name} signal ${ this._waiting_for.length } waiters`);
+      Promise.all(this._waiting_for).then(() => {
+        this.transition('logged_in');
+      },(x) => {
+        this.reportError(x);
+        debugger;
+//        this.transition('logged_out')
+      })
+
+      this._waiting_for = null;
+    },
+
+    wait_for: function(promise) {
+      this._waiting_for.push(promise);
+    },
+  });
+}
+
 module.exports = machina.Fsm.extend(
   {
     loadState: function(options) {
@@ -45,7 +69,7 @@ module.exports = machina.Fsm.extend(
         load_state: function(options) {
           if(options && options.token && options.member_id && options.email) {
             this.data = options;
-            this.transition('logged_in');
+            this.transition('restoring');
           } else {
             this.transition('logged_out');
           }
@@ -56,7 +80,7 @@ module.exports = machina.Fsm.extend(
       // password
       logged_out: _.extend({}, defaultHandlers, {
         logout: function() { return err(`Cannot log out while ${this.state}`); },
-      
+        
         login: function(...args) {
           this.transition('authenticating');
           return this._login(...args).then((res) => {
@@ -106,60 +130,9 @@ module.exports = machina.Fsm.extend(
       // service.  "Logging in" can take between zero seconds and a few seconds,
       // depending on how much data fits into this category.  It is advised that
       // faster is better!
-      logging_in: _.extend({}, defaultHandlers, {
-        _onEnter: function() {
-          console.log('Sending logging in signal');
-          this.emit('logging_in');
-          console.log('Done sending logging in signal');
-
-          if (!this._waiting_for && this._waiting_for.length == 0) {
-            this.transition('logged_in');
-          }
-        },
-
-        wait_for: function(promise) {
-          this._waiting_for = this._waiting_for || [];
-          this._waiting_for.push(promise);
-
-          promise.then(() => {
-            let index = this._waiting_for.indexOf(promise);
-            this._waiting_for.splice(index, 1);
-
-            if (this._waiting_for.length == 0) {
-              this._waiting_for = null;
-              this.transition('logged_in');
-            }
-          }).catch((x) => {
-            this.reportError(x);
-            this.transition('logged_out');
-          });
-        },
-      }),
-      signing_up: _.extend({}, defaultHandlers, {
-        _onEnter: function() {
-          console.log('Sending logging in signal');
-          this.emit('signing_up');
-          console.log('Done sending logging in signal');
-        },
-
-        wait_for: function(promise) {
-          this._waiting_for = this._waiting_for || [];
-          this._waiting_for.push(promise);
-
-          promise.then(() => {
-            let index = this._waiting_for.indexOf(promise);
-            this._waiting_for.splice(index, 1);
-            if (this._waiting_for.length == 0) {
-              this._waiting_for = null;
-
-              this.transition('logged_in');
-            }
-          }).catch((x) => {
-            this.reportError(x);
-            this.transition('logged_out');
-          });
-        },
-      }),
+      logging_in: waitingState('logging_in'),
+      restoring: waitingState('restoring'),
+      signing_up: waitingState('signing_up'),
 
       // We are logged in!  We can now go about our business.
       logged_in: _.extend({}, defaultHandlers, {
