@@ -20,7 +20,7 @@ let defaultHandlers = {
   signup: function() { return err(`Cannot sign up while ${this.state}`); },
 
   logout: function() {
-    this.emit('api_data_changed',undefined);
+    this.emit('api_data_changed', undefined);
     return this._logout().catch((x) => { console.error('Error logging out: ', x); })
       .then(() => this.transition('logged_out'));
   },
@@ -39,11 +39,12 @@ function waitingState(name) {
       console.log(`Done sending ${name} signal ${ this._waiting_for.length } waiters`);
       Promise.all(this._waiting_for).then(() => {
         this.transition('logged_in');
-      },(x) => {
+      }, (x) => {
         this.reportError(x);
         debugger;
-//        this.transition('logged_out')
-      })
+
+        //        this.transition('logged_out')
+      });
 
       this._waiting_for = null;
     },
@@ -67,7 +68,7 @@ module.exports = machina.Fsm.extend(
     states: {
       uninitialized: _.extend({}, defaultHandlers, {
         load_state: function(options) {
-          if(options && options.token && options.member_id && options.email) {
+          if (options && options.token && options.member_id && options.email) {
             this.data = options;
             this.transition('restoring');
           } else {
@@ -79,14 +80,18 @@ module.exports = machina.Fsm.extend(
       // Nobody is logged in, we can log in, reset a password, or recover a
       // password
       logged_out: _.extend({}, defaultHandlers, {
+        _onEnter: function() {
+          this.emit('clear_data');
+        },
+
         logout: function() { return err(`Cannot log out while ${this.state}`); },
-        
+
         login: function(...args) {
           this.transition('authenticating');
           return this._login(...args).then((res) => {
             this.data = res;
-            
-            this.emit('api_data_changed',res);
+
+            this.emit('api_data_changed', res);
             this.transition('logging_in');
             return res;
           }).catch((x) => {
@@ -99,7 +104,7 @@ module.exports = machina.Fsm.extend(
           this.transition('authenticating');
           return this._signup(...args).then((res) => {
             this.data = res;
-            this.emit('api_data_changed',res);
+            this.emit('api_data_changed', res);
             this.transition('signing_up');
             return res;
           }).catch((x) => {
@@ -144,7 +149,7 @@ module.exports = machina.Fsm.extend(
 
     signup: function(...args) { return this.handle('signup', ...args); },
 
-    logout: function(...args) { return this.handle('logout', ...args ); },
+    logout: function(...args) { return this.handle('logout', ...args); },
 
     waitFor: function(promise) { return this.handle('wait_for', promise); },
 
@@ -192,7 +197,8 @@ module.exports = machina.Fsm.extend(
     _recoverPassword: function(...args) {
 
     },
-    _reject: function(message){
+
+    _reject: function(message) {
       return Promise.reject(message);
     },
 
