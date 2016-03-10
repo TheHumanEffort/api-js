@@ -65,10 +65,14 @@ module.exports = machina.Fsm.extend(
 
     initialState: 'uninitialized',
 
+    validateLoadState: function(state) {
+      return state && (state.member_id || state.id) && state.email;
+    },
+
     states: {
       uninitialized: _.extend({}, defaultHandlers, {
-        load_state: function (options) {
-          if (options && options.token && options.member_id && options.email) {
+        load_state: function(options) {
+          if (this.validateLoadState(options)) {
             this.data = options;
             this.transition('restoring');
           } else {
