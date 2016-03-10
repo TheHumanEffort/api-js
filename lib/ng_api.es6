@@ -1,4 +1,3 @@
-
 import Base from './base_api.es6';
 
 let NgHttpApi = Base.extend({
@@ -34,6 +33,13 @@ let NgHttpApi = Base.extend({
 
       return Promise.reject(res);
     });
+  },
+
+  delete: function(relativeUrl, deleteData) {
+    return this._$http(
+      { method: 'DELETE',
+        url: this.url(relativeUrl),
+        data: deleteData, });
   },
 
   post: function(relativeUrl, postData) {
