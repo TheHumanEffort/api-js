@@ -7,32 +7,32 @@ function err(message) {
 }
 
 let defaultHandlers = {
-  wait_for: function () {
+  wait_for: function() {
     this.reportError(`Cannot wait for login results while ${this.state}`);
   },
 
-  load_state: function () {
+  load_state: function() {
     this.reportError(`Cannot load state while ${this.state}`);
   },
 
-  login: function () { return err(`Cannot log in while ${this.state}`); },
+  login: function() { return err(`Cannot log in while ${this.state}`); },
 
-  signup: function () { return err(`Cannot sign up while ${this.state}`); },
+  signup: function() { return err(`Cannot sign up while ${this.state}`); },
 
-  logout: function () {
+  logout: function() {
     this.emit('api_data_changed', undefined);
     return this._logout().catch((x) => { console.error('Error logging out: ', x); })
       .then(() => this.transition('logged_out'));
   },
 
-  recover_password: function () { return err(`Cannot recover password while ${this.state}`); },
+  recover_password: function() { return err(`Cannot recover password while ${this.state}`); },
 
-  reset_password: function () { return err(`Cannot reset password while ${this.state}`); },
+  reset_password: function() { return err(`Cannot reset password while ${this.state}`); },
 };
 
 function waitingState(name) {
   return _.extend({}, defaultHandlers, {
-    _onEnter: function () {
+    _onEnter: function() {
       console.log(`Sending ${name} signal`);
       this._waiting_for = [];
       this.emit(name);
@@ -49,7 +49,7 @@ function waitingState(name) {
       this._waiting_for = null;
     },
 
-    wait_for: function (promise) {
+    wait_for: function(promise) {
       this._waiting_for.push(promise);
     },
   });
@@ -57,7 +57,7 @@ function waitingState(name) {
 
 module.exports = machina.Fsm.extend(
   {
-    loadState: function (options) {
+    loadState: function(options) {
       return this.handle('load_state', options);
     },
 
@@ -84,13 +84,13 @@ module.exports = machina.Fsm.extend(
       // Nobody is logged in, we can log in, reset a password, or recover a
       // password
       logged_out: _.extend({}, defaultHandlers, {
-        _onEnter: function () {
+        _onEnter: function() {
           this.emit('clear_data');
         },
 
-        logout: function () { return err(`Cannot log out while ${this.state}`); },
+        logout: function() { return err(`Cannot log out while ${this.state}`); },
 
-        login: function (...args) {
+        login: function(...args) {
           this.transition('authenticating');
           return this._login(...args).then((res) => {
             this.data = res;
@@ -104,7 +104,7 @@ module.exports = machina.Fsm.extend(
           });
         },
 
-        signup: function (...args) {
+        signup: function(...args) {
           this.transition('authenticating');
           return this._signup(...args).then((res) => {
             this.data = res;
@@ -117,11 +117,11 @@ module.exports = machina.Fsm.extend(
           });
         },
 
-        recover_password: function (...args) {
+        recover_password: function(...args) {
           return this._recoverPassword(...args);
         },
 
-        reset_password: function (...args) {
+        reset_password: function(...args) {
           return this._resetPassword(...args);
         },
       }),
@@ -145,23 +145,23 @@ module.exports = machina.Fsm.extend(
 
       // We are logged in!  We can now go about our business.
       logged_in: _.extend({}, defaultHandlers, {
-        wait_for: function () { this.reportError('Cannot wait for login results while logged in'); },
+        wait_for: function() { this.reportError('Cannot wait for login results while logged in'); },
       }),
     },
 
-    login: function (...args) { return this.handle('login', ...args); },
+    login: function(...args) { return this.handle('login', ...args); },
 
-    signup: function (...args) { return this.handle('signup', ...args); },
+    signup: function(...args) { return this.handle('signup', ...args); },
 
-    logout: function (...args) { return this.handle('logout', ...args); },
+    logout: function(...args) { return this.handle('logout', ...args); },
 
-    waitFor: function (promise) { return this.handle('wait_for', promise); },
+    waitFor: function(promise) { return this.handle('wait_for', promise); },
 
-    recoverPassword: function (...args) { return this.handle('recover_password', ...args); },
+    recoverPassword: function(...args) { return this.handle('recover_password', ...args); },
 
-    resetPassword: function (...args) { return this.handle('reset_password', ...args); },
+    resetPassword: function(...args) { return this.handle('reset_password', ...args); },
 
-    reportError: function (error) {
+    reportError: function(error) {
       console.error(error);
 
       this.emit('status', 'error', { message: error });
@@ -187,31 +187,31 @@ module.exports = machina.Fsm.extend(
     // subclasses should implement these, each does the most sensible thing
     // given their input, and will be what is called internally.  Should return
     // a promise.
-    _login: function (...args) {
+    _login: function(...args) {
       throw new Error('UnimplementedLogin');
     },
 
     // logout should log the current session out, and optionally take a hash.
     // it should return a promise, which will most likely be ignored.
-    _logout: function (...args) {
+    _logout: function(...args) {
       throw new Error('UnimplementedLogout');
     },
 
     // recover password should send an email/SMS with a token, or whatever
-    _recoverPassword: function (...args) {
+    _recoverPassword: function(...args) {
 
     },
 
-    _reject: function (message) {
+    _reject: function(message) {
       return Promise.reject(message);
     },
 
     // reset password should take a token and a password, and return a promise
-    _resetPassword: function (...args) {
+    _resetPassword: function(...args) {
       throw new Error('UnimplementedResetPassword');
     },
 
-    _signup: function (...args) {
+    _signup: function(...args) {
       throw new Error('UnimplementedSignup');
     },
   }
