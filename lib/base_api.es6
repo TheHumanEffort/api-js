@@ -75,6 +75,7 @@ module.exports = machina.Fsm.extend(
         load_state: function(options) {
           if (this.validateLoadState(options)) {
             this.data = options;
+            this.emit('api_data_changed', this.data);
             this.transition('restoring');
           } else {
             this.transition('logged_out');
