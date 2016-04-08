@@ -2,10 +2,6 @@
 import machina from 'machina';
 import _ from 'lodash';
 
-function err(message) {
-  return new Promise((resolve, reject) => { reject(message); });
-}
-
 let defaultHandlers = {
   wait_for: function() {
     this.reportError(`Cannot wait for login results while ${this.state}`);
@@ -15,9 +11,9 @@ let defaultHandlers = {
     this.reportError(`Cannot load state while ${this.state}`);
   },
 
-  login: function() { return err(`Cannot log in while ${this.state}`); },
+  login: function() { return this.reject(`Cannot log in while ${this.state}`); },
 
-  signup: function() { return err(`Cannot sign up while ${this.state}`); },
+  signup: function() { return this.reject(`Cannot sign up while ${this.state}`); },
 
   logout: function() {
     this.emit('api_data_changed', undefined);
@@ -37,7 +33,7 @@ function waitingState(name) {
       this._waiting_for = [];
       this.emit(name);
       console.log(`Done sending ${name} signal ${ this._waiting_for.length } waiters`);
-      Promise.all(this._waiting_for).then(() => {
+      this._Promise.all(this._waiting_for).then(() => {
         this.transition('logged_in');
       }, (x) => {
         this.reportError(x);
@@ -61,6 +57,8 @@ module.exports = machina.Fsm.extend(
     loadState: function(options) {
       return this.handle('load_state', options);
     },
+
+    _Promise: Promise,
 
     namespace: 'api',
 
@@ -95,12 +93,17 @@ module.exports = machina.Fsm.extend(
         login: function(...args) {
           this.transition('authenticating');
           return this._login(...args).then((res) => {
-            this.data = res;
+            if (res && res.success == false) {
+              return this._reject(res);
+            } else {
+              this.data = res;
 
-            this.emit('api_data_changed', res);
-            this.transition('logging_in');
-            return res;
+              this.emit('api_data_changed', res);
+              this.transition('logging_in');
+              return res;
+            }
           }).catch((x) => {
+            console.log('FAIL: ', x);
             this.transition('logged_out');
             return this._reject(x);
           });
@@ -205,7 +208,7 @@ module.exports = machina.Fsm.extend(
     },
 
     _reject: function(message) {
-      return Promise.reject(message);
+      return this._Promise.reject(message);
     },
 
     // reset password should take a token and a password, and return a promise

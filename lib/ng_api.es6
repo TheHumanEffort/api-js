@@ -5,7 +5,7 @@ let NgHttpApi = Base.extend({
     Base.prototype.initialize.call(this, options, ...args);
 
     this._baseUrl = options.baseUrl;
-    this._$q = options.$q;
+    this._Promise = options.$q;
     this._$http = options.$http;
   },
 
@@ -16,7 +16,9 @@ let NgHttpApi = Base.extend({
   _procHttpResponse: function(promise) {
     return promise.then((res) => {
       if (res.data.errors) {
-        return this._$q.reject({ type: this.ERROR_VALIDATION_FAILED, data: res.data.errors });
+        return this._Promise.reject({ type: this.ERROR_VALIDATION_FAILED, data: res.data.errors });
+      } else if (res.data.success == false) {
+        return this._Promise.reject({ type: this.ERROR_AUTHENTICATION_FAILED, message: 'Login incorrect - try again.' });
       } else {
         return res.data;
       }
@@ -31,7 +33,7 @@ let NgHttpApi = Base.extend({
         res = { type: this.ERROR_SERVER, message: 'There was an error on the server' };
       }
 
-      return Promise.reject(res);
+      return this._Promise.reject(res);
     });
   },
 
@@ -61,9 +63,6 @@ let NgHttpApi = Base.extend({
     return this.post('authentication/logout');
   },
 
-  _reject: function(message) {
-    this._$q.reject(message);
-  },
 });
 
 angular.module('ngApi', []).provider('Api', function() {
