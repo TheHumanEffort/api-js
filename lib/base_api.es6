@@ -39,8 +39,7 @@ function waitingState(name) {
         this.reportError(x);
 
         //        debugger;
-
-        //        this.transition('logged_out')
+        this.transition('logged_out');
       });
 
       this._waiting_for = null;
