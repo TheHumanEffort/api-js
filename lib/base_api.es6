@@ -85,6 +85,7 @@ module.exports = machina.Fsm.extend(
       logged_out: _.extend({}, defaultHandlers, {
         _onEnter: function() {
           this.emit('clear_data');
+          this.reportStatus('Logged out');
         },
 
         logout: function() { return err(`Cannot log out while ${this.state}`); },
@@ -169,6 +170,10 @@ module.exports = machina.Fsm.extend(
       console.error(error);
 
       this.emit('status', 'error', { message: error });
+    },
+
+    reportStatus: function(status) {
+      this.emit('status', 'status', { message: status });
     },
 
     // Subclassers take note, errors take 'normal' structures, with the
