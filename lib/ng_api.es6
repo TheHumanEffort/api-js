@@ -10,7 +10,13 @@ let NgHttpApi = Base.extend({
   },
 
   url: function(method) {
-    return `${this._baseUrl}/${method}`;
+    if (method && method.match(/^\//)) {
+      var hostMatch = this._baseUrl.match(/^(https?\:\/\/.*?)\//);
+      var schemeAndHost = hostMatch[1];
+      return `${ schemeAndHost }${method }`;
+    } else {
+      return `${this._baseUrl}/${method}`;
+    }
   },
 
   _procHttpResponse: function(promise) {
