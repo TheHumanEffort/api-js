@@ -11,9 +11,9 @@ let defaultHandlers = {
     this.reportError(`Cannot load state while ${this.state}`);
   },
 
-  login: function() { return this.reject(`Cannot log in while ${this.state}`); },
+  login: function() { return this._reject(`Cannot log in while ${this.state}`); },
 
-  signup: function() { return this.reject(`Cannot sign up while ${this.state}`); },
+  signup: function() { return this._reject(`Cannot sign up while ${this.state}`); },
 
   logout: function() {
     this.emit('api_data_changed', undefined);
