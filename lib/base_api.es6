@@ -2,6 +2,10 @@
 import machina from 'machina';
 import _ from 'lodash';
 
+function err(message) {
+  return new Error(message);
+}
+
 let defaultHandlers = {
   wait_for: function() {
     this.reportError(`Cannot wait for login results while ${this.state}`);
