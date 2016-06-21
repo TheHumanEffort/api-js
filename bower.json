@@ -2,6 +2,7 @@
   "name": "api-js",
   "description": "Simple JS API state management code",
   "main": "dist/index.js",
+  "version": "0.0.3b1",
   "authors": [
     "Daniel Staudigel (dan@thehumaneffort.com)"
   ],
