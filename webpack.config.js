@@ -4,15 +4,16 @@ var path = require('path');
 var env = require('yargs').argv.mode;
 
 var libraryName = 'ApiJS';
+var fileBase = 'api';
 
 var plugins = [];
 var outputFile;
 
 if (env === 'build') {
   plugins.push(new UglifyJsPlugin({ minimize: true }));
-  outputFile = libraryName + '.min.js';
+  outputFile = fileBase + '.min.js';
 } else {
-  outputFile = libraryName + '.js';
+  outputFile = fileBase + '.js';
 }
 
 var config = {
