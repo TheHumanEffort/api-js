@@ -1,6 +1,10 @@
 // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
-import machina from 'machina';
-import _ from 'lodash';
+
+// Object.assign is an important function supported by most modern browsers:
+require('es6-object-assign').polyfill();
+
+// Machina is the state machine provider:
+import machina from '../dependencies/machina';
 
 function err(message) {
   return new Error(message);
@@ -31,7 +35,7 @@ let defaultHandlers = {
 };
 
 function waitingState(name) {
-  return _.extend({}, defaultHandlers, {
+  return Object.assign({}, defaultHandlers, {
     _onEnter: function() {
       console.log(`Sending ${name} signal`);
       this._waiting_for = [];
@@ -72,7 +76,7 @@ module.exports = machina.Fsm.extend(
     },
 
     states: {
-      uninitialized: _.extend({}, defaultHandlers, {
+      uninitialized: Object.assign({}, defaultHandlers, {
         load_state: function(options) {
           if (this.validateLoadState(options)) {
             this.data = options;
@@ -86,7 +90,7 @@ module.exports = machina.Fsm.extend(
 
       // Nobody is logged in, we can log in, reset a password, or recover a
       // password
-      logged_out: _.extend({}, defaultHandlers, {
+      logged_out: Object.assign({}, defaultHandlers, {
         _onEnter: function() {
           this.emit('clear_data');
           this.reportStatus('Logged out');
@@ -97,7 +101,7 @@ module.exports = machina.Fsm.extend(
         login: function(...args) {
           this.transition('authenticating');
           return this._login(...args).then((res) => {
-            if (res && res.success == false) {
+            if (res && res.success === false) {
               return this._reject(res);
             } else {
               this.data = res;
@@ -138,7 +142,7 @@ module.exports = machina.Fsm.extend(
       // Authenticating is when we have requested to be logged in, but we have
       // not received word from the API service about whether or not we have
       // successfully logged in.
-      authenticating: _.extend({}, defaultHandlers, {
+      authenticating: Object.assign({}, defaultHandlers, {
 
       }),
 
@@ -153,7 +157,7 @@ module.exports = machina.Fsm.extend(
       signing_up: waitingState('signing_up'),
 
       // We are logged in!  We can now go about our business.
-      logged_in: _.extend({}, defaultHandlers, {
+      logged_in: Object.assign({}, defaultHandlers, {
         wait_for: function() { this.reportError('Cannot wait for login results while logged in'); },
       }),
     },

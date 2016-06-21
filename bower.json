@@ -1,0 +1,26 @@
+{
+  "name": "api-js",
+  "description": "Simple JS API state management code",
+  "main": "dist/index.js",
+  "authors": [
+    "Daniel Staudigel (dan@thehumaneffort.com)"
+  ],
+  "license": "LGPL-3.0",
+  "keywords": [
+    "api",
+    "state",
+    "management"
+  ],
+  "homepage": "https://github.com/TheHumanEffort/api-js",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "machina": "^1.1.2"
+  }
+}
