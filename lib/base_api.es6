@@ -92,8 +92,10 @@ module.exports = machina.Fsm.extend(
       // password
       logged_out: Object.assign({}, defaultHandlers, {
         _onEnter: function() {
+          this.data = {};
           this.emit('clear_data');
           this.reportStatus('Logged out');
+          this.emit('logged_out');
         },
 
         logout: function() { return err(`Cannot log out while ${this.state}`); },
